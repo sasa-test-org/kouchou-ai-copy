@@ -32,8 +32,8 @@ jobs:
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        QD_API_KEY: ${{ secrets.QD_API_KEY }}
-        QD_URL: ${{ secrets.QD_URL }}
+        # QD_API_KEY: ${{ secrets.QD_API_KEY }}
+        # QD_URL: ${{ secrets.QD_URL }}
         GITHUB_REPOSITORY: ${{ github.repository }}
         GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
       run: |

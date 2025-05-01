@@ -4,8 +4,8 @@ import regex as re
 from github import Github
 from github.Issue import Issue
 from github.Repository import Repository
-from qdrant_client import QdrantClient
-from qdrant_client.models import PointStruct
+# from qdrant_client import QdrantClient
+# from qdrant_client.models import PointStruct
 import openai
 
 if not os.getenv('GITHUB_ACTIONS'):
@@ -26,11 +26,11 @@ class Config:
         else:
             print("GITHUB_TOKENからトークンを正常に取得しました。")
         
-        self.qd_api_key = os.getenv("QD_API_KEY")
-        print("QD_API_KEYの状態:", "取得済み" if self.qd_api_key else "見つかりません")
+        # self.qd_api_key = os.getenv("QD_API_KEY")
+        # print("QD_API_KEYの状態:", "取得済み" if self.qd_api_key else "見つかりません")
         
-        self.qd_url = os.getenv("QD_URL")
-        print("QD_URLの状態:", "取得済み" if self.qd_url else "見つかりません")
+        # self.qd_url = os.getenv("QD_URL")
+        # print("QD_URLの状態:", "取得済み" if self.qd_url else "見つかりません")
         
         self.github_repo = os.getenv("GITHUB_REPOSITORY")
         print("GITHUB_REPOSITORYの状態:", "取得済み" if self.github_repo else "見つかりません")
@@ -54,22 +54,63 @@ class GithubHandler:
         try:
             labels_to_create = [
                 'Admin', 'Algorithm', 'API', 'bug', 'Client', 'dependencies', 'design', 
-                'docker', 'documentation', 'duplicate', 'e2e-test-required', 'enhancement', 
+                'docker', 'documentation', # 'duplicate', 
+                'e2e-test-required', 'enhancement', 
                 'github_actions', 'good first issue', 'help wanted', 'high priority', 
-                'invalid', 'javascript', 'python', 'question', 'wontfix', 'toxic'
+                'invalid', 'javascript', 'python', 'question', 'wontfix' # , 'toxic'
             ]
             
             for label in labels_to_create:
                 color = "708090"  # デフォルトのグレー
                 
-                if label == "toxic":
-                    color = "ff0000"  # 赤
+                if label == "Admin":
+                    color = "0075ca"  # 青
+                elif label == "github_actions":
+                    color = "5319e7"  # 紫
+                elif label == "docker":
+                    color = "0db7ed"  # Docker青
+                elif label == "dependencies":
+                    color = "6b5b95"  # 薄紫
+                
+                elif label == "Algorithm":
+                    color = "c5def5"  # 薄い青
+                elif label == "API":
+                    color = "1d76db"  # 濃い青
+                elif label == "Client":
+                    color = "fbca04"  # 黄色
+                elif label == "javascript":
+                    color = "f7df1e"  # JavaScript黄色
+                elif label == "python":
+                    color = "3572A5"  # Python青
+                
+                elif label == "documentation":
+                    color = "0075ca"  # 青
+                elif label == "e2e-test-required":
+                    color = "bfdadc"  # 薄い青緑
+                
                 elif label == "bug":
                     color = "d73a4a"  # 赤系
                 elif label == "enhancement":
                     color = "a2eeef"  # 水色系
+                elif label == "design":
+                    color = "cc33cc"  # ピンク
                 elif label == "high priority":
                     color = "ff9900"  # オレンジ
+                elif label == "invalid":
+                    color = "e4e669"  # 黄緑
+                elif label == "wontfix":
+                    color = "ffffff"  # 白
+                
+                elif label == "good first issue":
+                    color = "7057ff"  # 紫
+                elif label == "help wanted":
+                    color = "008672"  # 緑
+                elif label == "question":
+                    color = "d876e3"  # ピンク
+                
+                # elif label == "toxic":
+                #     color = "ff0000"  # 赤
+                # elif label == "duplicate":
                 
                 self.repo.create_label(name=label, color=color)
         except:
@@ -87,93 +128,92 @@ class GithubHandler:
         """Issueにコメントを追加する"""
         self.issue.create_comment(comment)
 
-class ContentModerator:
-    def __init__(self, openai_client: openai.Client):
-        self.openai_client = openai_client
+# class ContentModerator:
+#     def __init__(self, openai_client: openai.Client):
+#         self.openai_client = openai_client
+# 
+#     def is_inappropriate_image(self, text: str) -> bool:
+#         """画像の内容が不適切かどうかを判断する"""
+#         image_url = self._extract_image_url(text)
+#         if not image_url:
+#             return False
+# 
+#         prompt = "この画像が暴力的、もしくは性的な画像の場合trueと返してください。"
+#         try:
+#             response = self.openai_client.chat.completions.create(
+#                 model=GPT_MODEL,
+#                 messages=[
+#                     {
+#                         "role": "user",
+#                         "content": [
+#                             {"type": "text", "text": prompt},
+#                             {"type": "image_url", "image_url": {"url": image_url}},
+#                         ],
+#                     }
+#                 ],
+#                 max_tokens=1200,
+#             )
+#             return "true" in response.choices[0].message.content.lower()
+#         except:
+#             return True
+# 
+#     def is_inappropriate_issue(self, text: str) -> bool:
+#         """テキストと画像の内容が不適切かどうかを判断する"""
+#         response = self.openai_client.moderations.create(input=text)
+#         return response.results[0].flagged or self.is_inappropriate_image(text)
+# 
+#     @staticmethod
+#     def _extract_image_url(text: str) -> str:
+#         """テキストから画像URLを抽出する"""
+#         match = re.search(r"!\[[^\s]+\]\((https://[^\s]+)\)", text)
+#         return match.group(1) if match else ""
 
-    def is_inappropriate_image(self, text: str) -> bool:
-        """画像の内容が不適切かどうかを判断する"""
-        image_url = self._extract_image_url(text)
-        if not image_url:
-            return False
-
-        prompt = "この画像が暴力的、もしくは性的な画像の場合trueと返してください。"
-        try:
-            response = self.openai_client.chat.completions.create(
-                model=GPT_MODEL,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "text", "text": prompt},
-                            {"type": "image_url", "image_url": {"url": image_url}},
-                        ],
-                    }
-                ],
-                max_tokens=1200,
-            )
-            return "true" in response.choices[0].message.content.lower()
-        except:
-            return True
-
-    def is_inappropriate_issue(self, text: str) -> bool:
-        """テキストと画像の内容が不適切かどうかを判断する"""
-        response = self.openai_client.moderations.create(input=text)
-        return response.results[0].flagged or self.is_inappropriate_image(text)
-
-    @staticmethod
-    def _extract_image_url(text: str) -> str:
-        """テキストから画像URLを抽出する"""
-        match = re.search(r"!\[[^\s]+\]\((https://[^\s]+)\)", text)
-        return match.group(1) if match else ""
-
-class QdrantHandler:
-    def __init__(self, client: QdrantClient, openai_client: openai.Client):
-        self.client = client
-        self.openai_client = openai_client
-
-    def add_issue(self, text: str, issue_number: int):
-        """新しい問題をQdrantに追加する"""
-        embedding = self._create_embedding(text)
-        point = PointStruct(id=issue_number, vector=embedding, payload={"text": text})
-        self.client.upsert(COLLECTION_NAME, [point])
-
-    def search_similar_issues(self, text: str) -> List[Dict[str, Any]]:
-        """類似の問題を検索する"""
-        embedding = self._create_embedding(text)
-        results = self.client.search(collection_name=COLLECTION_NAME, query_vector=embedding)
-        return results[:MAX_RESULTS]
-
-    def _create_embedding(self, text: str) -> List[float]:
-        """テキストのembeddingを作成する"""
-        result = self.openai_client.embeddings.create(input=[text], model=EMBEDDING_MODEL)
-        return result.data[0].embedding
+# class QdrantHandler:
+#     def __init__(self, client: QdrantClient, openai_client: openai.Client):
+#         self.client = client
+#         self.openai_client = openai_client
+# 
+#     def add_issue(self, text: str, issue_number: int):
+#         """新しい問題をQdrantに追加する"""
+#         embedding = self._create_embedding(text)
+#         point = PointStruct(id=issue_number, vector=embedding, payload={"text": text})
+#         self.client.upsert(COLLECTION_NAME, [point])
+# 
+#     def search_similar_issues(self, text: str) -> List[Dict[str, Any]]:
+#         """類似の問題を検索する"""
+#         embedding = self._create_embedding(text)
+#         results = self.client.search(collection_name=COLLECTION_NAME, query_vector=embedding)
+#         return results[:MAX_RESULTS]
+# 
+#     def _create_embedding(self, text: str) -> List[float]:
+#         """テキストのembeddingを作成する"""
+#         result = self.openai_client.embeddings.create(input=[text], model=EMBEDDING_MODEL)
+#         return result.data[0].embedding
 
 class IssueProcessor:
-    def __init__(self, github_handler: GithubHandler, content_moderator: ContentModerator, qdrant_handler: QdrantHandler, openai_client: openai.Client):
+    def __init__(self, github_handler: GithubHandler, openai_client: openai.Client):
         self.github_handler = github_handler
-        self.content_moderator = content_moderator
-        self.qdrant_handler = qdrant_handler
         self.openai_client = openai_client
         self.available_labels = [
             'Admin', 'Algorithm', 'API', 'bug', 'Client', 'dependencies', 'design', 
-            'docker', 'documentation', 'duplicate', 'e2e-test-required', 'enhancement', 
+            'docker', 'documentation', # 'duplicate', 
+            'e2e-test-required', 'enhancement', 
             'github_actions', 'good first issue', 'help wanted', 'high priority', 
             'invalid', 'javascript', 'python', 'question', 'wontfix'
         ]
 
     def process_issue(self, issue_content: str, issue_title: str = ""):
         """Issueを処理する"""
-        if self.content_moderator.is_inappropriate_issue(issue_content):
-            self._handle_violation()
-            return
+        # if self.content_moderator.is_inappropriate_issue(issue_content):
+        #     self._handle_violation()
+        #     return
 
         if issue_title:
             self._check_and_add_title_labels(issue_title)
         
         self._analyze_and_add_content_labels(issue_content)
 
-        self.qdrant_handler.add_issue(issue_content, self.github_handler.issue.number)
+        # self.qdrant_handler.add_issue(issue_content, self.github_handler.issue.number)
         
     def _check_and_add_title_labels(self, title: str):
         """タイトルの先頭に[text]形式の文字列や絵文字があるか確認し、対応するラベルを付与する"""
@@ -290,16 +330,16 @@ def setup():
     github_handler.create_labels()
 
     openai_client = openai.Client()
-    content_moderator = ContentModerator(openai_client)
+    # content_moderator = ContentModerator(openai_client)
 
-    qdrant_client = QdrantClient(url=config.qd_url, api_key=config.qd_api_key)
-    qdrant_handler = QdrantHandler(qdrant_client, openai_client)
+    # qdrant_client = QdrantClient(url=config.qd_url, api_key=config.qd_api_key)
+    # qdrant_handler = QdrantHandler(qdrant_client, openai_client)
 
-    return github_handler, content_moderator, qdrant_handler, openai_client
+    return github_handler, openai_client
 
 def main():
-    github_handler, content_moderator, qdrant_handler, openai_client = setup()
-    issue_processor = IssueProcessor(github_handler, content_moderator, qdrant_handler, openai_client)
+    github_handler, openai_client = setup()
+    issue_processor = IssueProcessor(github_handler, openai_client)
     issue_title = github_handler.issue.title
     issue_content = f"{issue_title}\n{github_handler.issue.body}"
     issue_processor.process_issue(issue_content, issue_title)
