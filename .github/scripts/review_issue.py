@@ -14,7 +14,7 @@ if not os.getenv('GITHUB_ACTIONS'):
 
 EMBEDDING_MODEL = "text-embedding-3-small"
 COLLECTION_NAME = "issue_collection"
-GPT_MODEL = "gpt-4o"
+GPT_MODEL = "gpt-4.1-nano"
 MAX_RESULTS = 3
 
 class Config:
