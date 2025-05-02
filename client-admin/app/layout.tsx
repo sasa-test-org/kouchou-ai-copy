@@ -1,8 +1,8 @@
-import ClientProvider from "./ClientProvider";
-import "./global.css";
 import { Toaster } from "@/components/ui/toaster";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata } from "next";
+import ClientProvider from "./ClientProvider";
+import "./global.css";
 
 export const metadata: Metadata = {
   title: "デジタル民主主義2030ブロードリスニング",

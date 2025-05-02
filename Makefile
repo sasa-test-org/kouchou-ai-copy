@@ -19,8 +19,8 @@ down:
 
 client-build-static:
 	rm -rf out
-	docker compose up -d api
-	docker compose run --rm -v $(shell pwd)/server:/server -v $(shell pwd)/out:/app/dist client sh -c "npm run build:static && cp -r out/* dist"
+	docker compose up -d --wait api
+	docker compose run --rm -e BASE_PATH=$(NEXT_PUBLIC_STATIC_EXPORT_BASE_PATH) -e NEXT_PUBLIC_OUTPUT_MODE=export -v $(shell pwd)/server:/server -v $(shell pwd)/out:/app/dist client sh -c "npm run build:static && cp -r out/* dist"
 	docker compose down
 
 client-setup:

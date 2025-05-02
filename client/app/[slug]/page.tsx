@@ -54,15 +54,22 @@ export async function generateMetadata({
     if (!metaResponse.ok || !resultResponse.ok) {
       return {};
     }
+
+    const { getBasePath } = await import("@/app/utils/image-src");
+    
     const meta: Meta = await metaResponse.json();
     const result: Result = await resultResponse.json();
     const metaData: Metadata = {
       title: `${result.config.question} - ${meta.reporter}`,
       description: `${result.overview}`,
-      metadataBase: new URL(
-        process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-      ),
     };
+    
+    // 静的エクスポート時はmetadataBaseを設定しない（相対パスを使用するため）
+    if (process.env.NEXT_PUBLIC_OUTPUT_MODE !== "export") {
+      // 開発環境やSSR時のみmetadataBaseを設定
+      const defaultHost = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+      metaData.metadataBase = new URL(defaultHost + getBasePath());
+    }
 
     if (process.env.NEXT_PUBLIC_OUTPUT_MODE === "export") {
       metaData.openGraph = {
