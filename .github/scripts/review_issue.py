@@ -149,11 +149,24 @@ def setup():
     """セットアップを行い、必要なオブジェクトを返す"""
     config = Config()
     github_handler = GithubHandler(config)
-    openai_client = openai.Client()
+
+    try:
+        openai_api_key = os.getenv("OPENAI_API_KEY")
+        if openai_api_key is None:
+            print("OPENAI_API_KEYが見つかりません ...")
+            return github_handler, None
+    except Exception as e:
+        print(f"OpenAI APIキーの取得中にエラーが発生しました: {e}")
+    openai_client = openai.Client(api_key=openai_api_key)
+
     return github_handler, openai_client
 
 def main():
     github_handler, openai_client = setup()
+    if github_handler is None or openai_client is None:
+        print("セットアップに失敗しました。")
+        return
+
     issue_processor = IssueProcessor(github_handler, openai_client)
     issue_title = github_handler.issue.title
     issue_content = f"{issue_title}\n{github_handler.issue.body}"
