@@ -61,49 +61,30 @@ class GithubHandler:
         }
         
         issue_node_id = self.issue.raw_data['node_id']
+        issue_number = self.issue.number
+        
+        print(f"Issueノード ID: {issue_node_id}")
+        print(f"Issue番号: {issue_number}")
+        print(f"プロジェクトID: {self.config.project_id}")
         
         query = """
-        query($projectId: ID!, $nodeId: ID!) {
+        query($projectId: ID!, $issueNumber: Int!, $repoOwner: String!, $repoName: String!) {
           node(id: $projectId) {
             ... on ProjectV2 {
-              items(first: 1, filter: {idString: $nodeId}) {
+              items(first: 100) {
                 nodes {
                   id
-                }
-              }
-            }
-          }
-        }
-        """
-        
-        variables = {
-            "projectId": self.config.project_id,
-            "nodeId": issue_node_id
-        }
-        
-        response = requests.post(
-            "https://api.github.com/graphql",
-            headers=headers,
-            json={"query": query, "variables": variables}
-        )
-        
-        if response.status_code != 200:
-            print(f"GraphQL APIからのエラー: {response.text}")
-            return None
-        
-        data = response.json()
-        if not data.get("data", {}).get("node", {}).get("items", {}).get("nodes"):
-            print("Projectにこのissueが見つかりません")
-            return None
-        
-        item_id = data["data"]["node"]["items"]["nodes"][0]["id"]
-        
-        query = """
-        query($projectId: ID!, $itemId: ID!, $fieldId: ID!) {
-          node(id: $projectId) {
-            ... on ProjectV2 {
-              items(first: 1, filter: {idString: $itemId}) {
-                nodes {
+                  content {
+                    ... on Issue {
+                      number
+                      repository {
+                        name
+                        owner {
+                          login
+                        }
+                      }
+                    }
+                  }
                   fieldValueByName(name: "Status") {
                     ... on ProjectV2ItemFieldSingleSelectValue {
                       name
@@ -116,11 +97,19 @@ class GithubHandler:
         }
         """
         
+        repo_parts = self.config.github_repo.split('/')
+        repo_owner = repo_parts[0]
+        repo_name = repo_parts[1]
+        
         variables = {
             "projectId": self.config.project_id,
-            "itemId": item_id,
-            "fieldId": self.config.status_field_id
+            "issueNumber": issue_number,
+            "repoOwner": repo_owner,
+            "repoName": repo_name
         }
+        
+        print(f"リポジトリ所有者: {repo_owner}")
+        print(f"リポジトリ名: {repo_name}")
         
         response = requests.post(
             "https://api.github.com/graphql",
@@ -133,10 +122,23 @@ class GithubHandler:
             return None
         
         data = response.json()
-        field_value = data.get("data", {}).get("node", {}).get("items", {}).get("nodes", [{}])[0].get("fieldValueByName")
+        project_items = data.get("data", {}).get("node", {}).get("items", {}).get("nodes", [])
         
-        if field_value:
-            return field_value.get("name")
+        for item in project_items:
+            content = item.get("content")
+            if content and content.get("__typename") == "Issue":
+                if (content.get("number") == issue_number and 
+                    content.get("repository", {}).get("name") == repo_name and 
+                    content.get("repository", {}).get("owner", {}).get("login") == repo_owner):
+                    
+                    field_value = item.get("fieldValueByName")
+                    if field_value:
+                        return field_value.get("name")
+                    return None
+        
+        print("Projectにこのissueが見つかりません。アイテム数:", len(project_items))
+        
+        
         return None
     
     def update_issue_status(self, status: str):
@@ -187,14 +189,30 @@ class GithubHandler:
             return False
         
         issue_node_id = self.issue.raw_data['node_id']
+        issue_number = self.issue.number
+        
+        repo_parts = self.config.github_repo.split('/')
+        repo_owner = repo_parts[0]
+        repo_name = repo_parts[1]
         
         query = """
-        query($projectId: ID!, $nodeId: ID!) {
+        query($projectId: ID!, $issueNumber: Int!, $repoOwner: String!, $repoName: String!) {
           node(id: $projectId) {
             ... on ProjectV2 {
-              items(first: 1, filter: {idString: $nodeId}) {
+              items(first: 100) {
                 nodes {
                   id
+                  content {
+                    ... on Issue {
+                      number
+                      repository {
+                        name
+                        owner {
+                          login
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -204,7 +222,9 @@ class GithubHandler:
         
         variables = {
             "projectId": self.config.project_id,
-            "nodeId": issue_node_id
+            "issueNumber": issue_number,
+            "repoOwner": repo_owner,
+            "repoName": repo_name
         }
         
         response = requests.post(
@@ -218,11 +238,23 @@ class GithubHandler:
             return False
         
         data = response.json()
-        if not data.get("data", {}).get("node", {}).get("items", {}).get("nodes"):
-            print("Projectにこのissueが見つかりません")
-            return False
+        project_items = data.get("data", {}).get("node", {}).get("items", {}).get("nodes", [])
         
-        item_id = data["data"]["node"]["items"]["nodes"][0]["id"]
+        item_id = None
+        for item in project_items:
+            content = item.get("content")
+            if content and content.get("__typename") == "Issue":
+                if (content.get("number") == issue_number and 
+                    content.get("repository", {}).get("name") == repo_name and 
+                    content.get("repository", {}).get("owner", {}).get("login") == repo_owner):
+                    item_id = item["id"]
+                    break
+        
+        if not item_id:
+            print("Projectにこのissueが見つかりません。イシューを追加します。")
+            item_id = self.add_issue_to_project(issue_node_id)
+            if not item_id:
+                return False
         
         mutation = """
         mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: ID!) {
@@ -258,3 +290,53 @@ class GithubHandler:
         
         print(f"ステータスを '{status}' に正常に更新しました")
         return True
+        
+    def add_issue_to_project(self, issue_node_id):
+        """GraphQL APIを使用してIssueをプロジェクトに追加する"""
+        headers = {
+            "Authorization": f"Bearer {self.config.github_token}",
+            "Content-Type": "application/json"
+        }
+        
+        mutation = """
+        mutation($projectId: ID!, $contentId: ID!) {
+          addProjectV2ItemById(input: {
+            projectId: $projectId,
+            contentId: $contentId
+          }) {
+            item {
+              id
+            }
+          }
+        }
+        """
+        
+        variables = {
+            "projectId": self.config.project_id,
+            "contentId": issue_node_id
+        }
+        
+        print(f"Issueをプロジェクトに追加します。Issue ID: {issue_node_id}")
+        
+        response = requests.post(
+            "https://api.github.com/graphql",
+            headers=headers,
+            json={"query": mutation, "variables": variables}
+        )
+        
+        if response.status_code != 200:
+            print(f"GraphQL APIからのエラー: {response.text}")
+            return None
+        
+        data = response.json()
+        if "errors" in data:
+            print(f"Issueの追加中にエラーが発生しました: {data['errors']}")
+            return None
+        
+        item = data.get("data", {}).get("addProjectV2ItemById", {}).get("item")
+        if item:
+            print(f"Issueをプロジェクトに正常に追加しました。Item ID: {item['id']}")
+            return item["id"]
+        
+        print("Issueをプロジェクトに追加できませんでした。")
+        return None
