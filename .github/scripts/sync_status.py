@@ -33,10 +33,6 @@ class Config:
         else:
             print("GITHUB_EVENT_ISSUE_NUMBERが見つかりません")
         
-        self.project_token = os.getenv("PROJECT_TOKEN")
-        if self.project_token is None:
-            print("PROJECT_TOKENが見つかりません ...")
-            return
         
         self.project_id = os.getenv("PROJECT_ID")
         if self.project_id is None:
@@ -60,7 +56,7 @@ class GithubHandler:
     def get_issue_status(self):
         """GraphQL APIを使用してIssueの現在のステータスを取得する"""
         headers = {
-            "Authorization": f"Bearer {self.config.project_token}",
+            "Authorization": f"Bearer {self.config.github_token}",
             "Content-Type": "application/json"
         }
         
@@ -146,7 +142,7 @@ class GithubHandler:
     def update_issue_status(self, status: str):
         """GraphQL APIを使用してIssueのステータスを更新する"""
         headers = {
-            "Authorization": f"Bearer {self.config.project_token}",
+            "Authorization": f"Bearer {self.config.github_token}",
             "Content-Type": "application/json"
         }
         
