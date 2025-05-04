@@ -63,7 +63,7 @@ class GithubHandler:
     def get_issue_status(self):
         """GraphQL APIを使用してIssueの現在のステータスを取得する"""
         headers = {
-            "Authorization": f"Bearer {self.config.github_token}",
+            "Authorization": f"Bearer {self.config.project_token}",
             "Content-Type": "application/json"
         }
         
@@ -151,7 +151,7 @@ class GithubHandler:
     def update_issue_status(self, status: str):
         """GraphQL APIを使用してIssueのステータスを更新する"""
         headers = {
-            "Authorization": f"Bearer {self.config.github_token}",
+            "Authorization": f"Bearer {self.config.project_token}",
             "Content-Type": "application/json"
         }
         
@@ -301,7 +301,7 @@ class GithubHandler:
     def add_issue_to_project(self, issue_node_id):
         """GraphQL APIを使用してIssueをプロジェクトに追加する"""
         headers = {
-            "Authorization": f"Bearer {self.config.github_token}",
+            "Authorization": f"Bearer {self.config.project_token}",
             "Content-Type": "application/json"
         }
         
