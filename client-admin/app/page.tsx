@@ -8,6 +8,7 @@ import {
   MenuRoot,
   MenuTrigger,
 } from "@/components/ui/menu";
+import { RadioCardItem, RadioCardRoot } from "@/components/ui/radio-card";
 import { toaster } from "@/components/ui/toaster";
 import { Tooltip } from "@/components/ui/tooltip";
 import type { Report } from "@/type";
@@ -500,53 +501,51 @@ function ReportCard({
               </Popover.Root>
             )}
             {report.status === "ready" && (
-              <>
-                <Tooltip
-                  content={report.isPublic ? "公開中" : "非公開"}
-                  openDelay={0}
-                  closeDelay={0}
+              <RadioCardRoot
+                value={report.isPublic ? "public" : "private"}
+                onValueChange={async (value) => {
+                  const selected = typeof value === "string" ? value : value?.value;
+                  if ((selected === "public" && report.isPublic) || (selected === "private" && !report.isPublic)) return;
+                  try {
+                    const response = await fetch(
+                      `${getApiBaseUrl()}/admin/reports/${report.slug}/visibility`,
+                      {
+                        method: "PATCH",
+                        headers: {
+                          "x-api-key": process.env.NEXT_PUBLIC_ADMIN_API_KEY || "",
+                          "Content-Type": "application/json",
+                        },
+                      },
+                    );
+                    if (!response.ok) {
+                      const errorData = await response.json();
+                      throw new Error(errorData.detail || "公開状態の変更に失敗しました");
+                    }
+                    const data = await response.json();
+                    const updatedReports = reports?.map((r) =>
+                      r.slug === report.slug ? { ...r, isPublic: data.isPublic } : r,
+                    );
+                    if (setReports) {
+                      setReports(updatedReports);
+                    }
+                  } catch (error) {
+                    console.error(error);
+                  }
+                }}
+              >
+                <Box
+                  display="flex"
+                  flexDirection="row"
+                  gap={1}
+                  minW="auto"
+                  onClick={e => e.stopPropagation()}
+                  onMouseDown={e => e.stopPropagation()}
+                  onPointerDown={e => e.stopPropagation()}
                 >
-                  <Box display="flex" alignItems="center">
-                    <Button
-                      variant={report.isPublic ? "solid" : "outline"}
-                      size="sm"
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        try {
-                          const response = await fetch(
-                            `${getApiBaseUrl()}/admin/reports/${report.slug}/visibility`,
-                            {
-                              method: "PATCH",
-                              headers: {
-                                "x-api-key":
-                                  process.env.NEXT_PUBLIC_ADMIN_API_KEY || "",
-                                "Content-Type": "application/json",
-                              },
-                            },
-                          );
-                          if (!response.ok) {
-                            const errorData = await response.json();
-                            throw new Error(errorData.detail || "公開状態の変更に失敗しました");
-                          }
-                          const data = await response.json();
-                          const updatedReports = reports?.map((r) =>
-                            r.slug === report.slug
-                              ? { ...r, isPublic: data.isPublic }
-                              : r,
-                          );
-                          if (setReports) {
-                            setReports(updatedReports);
-                          }
-                        } catch (error) {
-                          console.error(error);
-                        }
-                      }}
-                    >
-                      {report.isPublic ? "公開中" : "非公開"}
-                    </Button>
-                  </Box>
-                </Tooltip>
-              </>
+                  <RadioCardItem value="public" label="公開" px={2} py={0.5} minW="40px" fontSize="sm" style={{whiteSpace: 'nowrap'}} />
+                  <RadioCardItem value="private" label="非公開" px={2} py={0.5} minW="60px" fontSize="sm" style={{whiteSpace: 'nowrap'}} />
+                </Box>
+              </RadioCardRoot>
             )}
             <MenuRoot>
               <MenuTrigger asChild>

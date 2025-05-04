@@ -10,7 +10,6 @@ permissions:
   issues: read
   contents: read
   pull-requests: read
-  project: write
 
 jobs:
   update_status:
