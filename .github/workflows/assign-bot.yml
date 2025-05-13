@@ -62,3 +62,7 @@ jobs:
     with:
       issue_number: ${{ needs.manage-assignment.outputs.issue_number }}
       action: ${{ needs.manage-assignment.outputs.action }}
+    secrets:
+      PJ_APP_ID: ${{ secrets.PJ_APP_ID }}
+      PJ_APP_PEM: ${{ secrets.PJ_APP_PEM }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
