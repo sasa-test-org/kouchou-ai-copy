@@ -126,11 +126,11 @@ class GithubHandler:
         
         for item in project_items:
             content = item.get("content")
-            print(content)
+            print(json.dumps(content))
             if content and content.get("__typename") == "Issue":
                 print(content.get("number") == issue_number)
                 print(content.get("repository", {}).get("name") == repo_name)
-                if content.get("number") == issue_number and content.get("repository", {}).get("name") == repo_name:
+                if (content.get("number") == issue_number) and (content.get("repository", {}).get("name") == repo_name):
                     field_value = item.get("fieldValueByName")
                     if field_value:
                         return field_value.get("name"), item["id"]
