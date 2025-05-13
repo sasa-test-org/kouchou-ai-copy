@@ -1,0 +1,15 @@
+name: Sync Project Status with Assignees
+
+on:
+  issues:
+    types: [assigned, unassigned]
+
+permissions:
+  issues: read
+
+jobs:
+  assign-status-sync:
+    uses: ./.github/workflows/assign-status-sync.yml
+    with:
+      issue_number: ${{ github.event.issue.number }}
+      action: ${{ github.event.action }}
