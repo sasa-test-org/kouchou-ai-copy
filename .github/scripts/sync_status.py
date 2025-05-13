@@ -99,7 +99,7 @@ class GithubHandler:
         """
         variables = {
             "repoOwner": REPO_OWNER,
-            "projectNo": 
+            "projectNo": PROJECT_NO
         }
         
         response = requests.post(
@@ -196,10 +196,8 @@ class GithubHandler:
             "fieldId": STATUS_FIELD_ID,
             "optionId": option_id
         }
-        print(PROJECT_ID)
-        print(item_id)
-        print(STATUS_FIELD_ID)
-        print(option_id)
+        print("itemId" + item_id)
+        print("optionId" + option_id)
         
         response = requests.post(
             "https://api.github.com/graphql",
