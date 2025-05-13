@@ -19,6 +19,9 @@ jobs:
       with:
         app-id: ${{ secrets.PJ_APP_ID }}
         private-key: ${{ secrets.PJ_APP_PEM }}
+        owner: ${{ github.repository_owner }}
+        repositories: |
+          kouchou-ai-copy
 
     - name: Checkout repository
       uses: actions/checkout@v4
