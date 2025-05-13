@@ -13,3 +13,7 @@ jobs:
     with:
       issue_number: ${{ github.event.issue.number }}
       action: ${{ github.event.action }}
+    secrets:
+      PJ_APP_ID: ${{ secrets.PJ_APP_ID }}
+      PJ_APP_PEM: ${{ secrets.PJ_APP_PEM }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
