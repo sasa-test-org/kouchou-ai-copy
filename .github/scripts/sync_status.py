@@ -26,12 +26,12 @@ class Config:
         self.github_repo = os.getenv("GITHUB_REPOSITORY")
         print("GITHUB_REPOSITORYの状態:", "取得済み" if self.github_repo else "見つかりません")
 
-        self.project_token = os.getenv("PROJECT_TOKEN")
+        self.project_token = os.getenv("GH_TOKEN")
         if self.project_token is None:
-            print("PROJECT_TOKENが見つかりません ...")
+            print("GH_TOKENが見つかりません ...")
             return
         else:
-            print("PROJECT_TOKENからトークンを正常に取得しました。")
+            print("GH_TOKENからトークンを正常に取得しました。")
             
         self.issue_number = os.getenv("GITHUB_EVENT_ISSUE_NUMBER")
         if self.issue_number:
