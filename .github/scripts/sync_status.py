@@ -7,7 +7,7 @@ if not os.getenv('GITHUB_ACTIONS'):
     from dotenv import load_dotenv
     load_dotenv()
 
-STATUS_NO_STATUS = "No Status"
+STATUS_NO_STATUS = null
 STATUS_COLD_LIST = "Cold List"
 STATUS_NEED_REFINEMENT = "Need Refinement"
 STATUS_READY = "Ready"
