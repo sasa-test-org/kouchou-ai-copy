@@ -187,7 +187,9 @@ class GithubHandler:
               singleSelectOptionId: $optionId
             }
           }) {
-            clientMutationId
+            projectV2Item {
+              id
+            }
           }
         }
         """
