@@ -59,6 +59,7 @@ class GithubHandler:
     def __init__(self, config: Config):
         self.github = Github(config.github_token)
         self.repo = self.github.get_repo(config.github_repo)
+        self.issue_number = config.issue_number
         self.issue = self.repo.get_issue(config.issue_number)
         self.config = config
     
@@ -117,7 +118,7 @@ class GithubHandler:
         for item in project_items:
             content = item.get("content")
             if content:
-                if (content.get("number") == issue_number and content.get("repository", {}).get("name") == REPO_NAME):
+                if (content.get("number") == self.issue_number and content.get("repository", {}).get("name") == REPO_NAME):
                     field_value = item.get("fieldValueByName")
                     if field_value:
                         print(item["id"])
