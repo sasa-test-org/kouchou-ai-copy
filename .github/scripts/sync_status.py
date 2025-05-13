@@ -121,7 +121,6 @@ class GithubHandler:
             return None
         
         resjson = response.json()
-        print("resjson: " + json.dumps(resjson))
         project_items = resjson.get("data", {}).get("organization", {}).get("projectV2", {}).get("items", {}).get("nodes", [])
         
         for item in project_items:
@@ -204,6 +203,10 @@ class GithubHandler:
             "fieldId": self.config.status_field_id,
             "optionId": option_id
         }
+        print(self.config.project_id)
+        print(item_id)
+        print(self.config.status_field_id)
+        print(option_id)
         
         response = requests.post(
             "https://api.github.com/graphql",
