@@ -37,7 +37,7 @@ jobs:
     - name: Update Status based on Assignment
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        PROJECT_TOKEN: ${{ steps.generate-token.outputs.token }}
+        GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         PROJECT_ID: ${{ secrets.PROJECT_ID }}
         STATUS_FIELD: ${{ secrets.STATUS_FIELD }}
         GITHUB_REPOSITORY: ${{ github.repository }}
