@@ -6,15 +6,20 @@ on:
 
 permissions:
   issues: read
-  contents: read
-  projects: write
 
 jobs:
   update_status:
     runs-on: ubuntu-latest
     timeout-minutes: 1
-    
+
     steps:
+    - name: Generate token
+      id: generate-token
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ secrets.PJ_APP_ID }}
+        private-key: ${{ secrets.PJ_APP_PEM }}
+
     - name: Checkout repository
       uses: actions/checkout@v4
 
@@ -28,11 +33,11 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r .github/requirements.txt
-
+        
     - name: Update Status based on Assignment
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        PROJECT_TOKEN: ${{ steps.generate-token.outputs.token }}
         PROJECT_ID: ${{ secrets.PROJECT_ID }}
         STATUS_FIELD: ${{ secrets.STATUS_FIELD }}
         GITHUB_REPOSITORY: ${{ github.repository }}
