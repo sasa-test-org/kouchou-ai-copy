@@ -135,7 +135,7 @@ class GithubHandler:
         print("Projectにこのissueが見つかりません。アイテム数:", len(project_items))
         return None, None
     
-    def update_issue_status(self, status: str, itemId: str):
+    def update_issue_status(self, status: str, item_id: str):
         """GraphQL APIを使用してIssueのステータスを更新する"""
         
         # まず更新後のstatus（名称）に対応するIDを調べる
