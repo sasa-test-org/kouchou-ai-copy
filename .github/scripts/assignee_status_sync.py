@@ -4,7 +4,7 @@ import os
 def main():
     config = Config()
     
-    if not all([config.github_token, config.github_repo, config.project_token, config.issue_number, config.status_field_id]):
+    if not all([config.github_token, config.github_repo, config.project_token, config.issue_number, config.project_id, config.status_field_id]):
         print("必要な環境変数が設定されていません。処理を中止します。")
         return
     
