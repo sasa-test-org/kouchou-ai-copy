@@ -7,11 +7,19 @@ if not os.getenv('GITHUB_ACTIONS'):
     from dotenv import load_dotenv
     load_dotenv()
 
+# 以下、digitaldemocracy2030/kouchou-ai の設定
+REPO_OWNER = "sasa-test-org"
+REPO_NAME = "kouchou-ai-copy"
+PROJECT_NO = 1
+PROJECT_ID = "PVT_kwDODIeyUM4A4Mna"
+STATUS_FIELD_ID = "PVTSSF_lADODIeyUM4A4MnazgtNHg0"
+
 STATUS_NO_STATUS = None
 STATUS_COLD_LIST = "Cold List"
 STATUS_NEED_REFINEMENT = "Need Refinement"
 STATUS_READY = "Ready"
 STATUS_IN_PROGRESS = "In Progress"
+STATUS_ARCHIVED = "Archived"
 
 class Config:
     def __init__(self):
@@ -24,7 +32,11 @@ class Config:
             print("GITHUB_TOKENからトークンを正常に取得しました。")
         
         self.github_repo = os.getenv("GITHUB_REPOSITORY")
-        print("GITHUB_REPOSITORYの状態:", "取得済み" if self.github_repo else "見つかりません")
+        if self.github_repo is None:
+            print("GITHUB_REPOSITORYが見つかりません ...")
+            return
+        else:
+            print("GITHUB_TOKENからトークンを正常に取得しました。")
 
         self.project_token = os.getenv("PROJECT_TOKEN")
         if self.project_token is None:
@@ -41,20 +53,6 @@ class Config:
             self.issue_number = int(self.issue_number)
             print("GITHUB_EVENT_ISSUE_NUMBERを正常に取得しました")
         
-        self.project_id = os.getenv("PROJECT_ID")
-        if self.project_id is None:
-            print("PROJECT_IDDが見つかりません...")
-            return
-        else:
-            print("PROJECT_IDを正常に取得しました。")
-        
-        self.status_field_id = os.getenv("STATUS_FIELD")
-        if self.status_field_id is None:
-            print("STATUS_FIELDが見つかりません...")
-            return
-        else:
-            print("STATUS_FIELDを正常に取得しました。")
-        
         print("設定の初期化が完了しました")
 
 class GithubHandler:
@@ -67,22 +65,14 @@ class GithubHandler:
     def get_issue_status_and_id(self):
         """GraphQL APIを使用してIssueの現在のステータスを取得する"""
         
-        issue_number = self.issue.number
-        repo_parts = self.config.github_repo.split('/')
-        repo_owner = repo_parts[0]
-        repo_name = repo_parts[1]
-        print(f"リポジトリ所有者: {repo_owner}")
-        print(f"リポジトリ名: {repo_name}")
-        print(f"Issue番号: {issue_number}")
-        
         headers = {
             "Authorization": f"Bearer {self.config.project_token}",
             "Content-Type": "application/json"
         }
         query = """
-        query($repoOwner: String!) {
+        query($repoOwner: String!, $projectNo: Int!) {
           organization(login: $repoOwner) {
-            projectV2(number: 1) {
+            projectV2(number: $projectNo) {
               ... on ProjectV2 {
                 items(first: 100) {
                   nodes {
@@ -108,7 +98,8 @@ class GithubHandler:
         }
         """
         variables = {
-            "repoOwner": repo_owner,
+            "repoOwner": REPO_OWNER,
+            "projectNo": 
         }
         
         response = requests.post(
@@ -126,7 +117,7 @@ class GithubHandler:
         for item in project_items:
             content = item.get("content")
             if content:
-                if (content.get("number") == issue_number and content.get("repository", {}).get("name") == repo_name):
+                if (content.get("number") == issue_number and content.get("repository", {}).get("name") == REPO_NAME):
                     field_value = item.get("fieldValueByName")
                     if field_value:
                         print(item["id"])
@@ -158,7 +149,7 @@ class GithubHandler:
         }
         """
         variables = {
-            "fieldId": self.config.status_field_id
+            "fieldId": STATUS_FIELD_ID
         }
         
         response = requests.post(
@@ -200,14 +191,14 @@ class GithubHandler:
         }
         """
         variables = {
-            "projectId": self.config.project_id,
+            "projectId": PROJECT_ID,
             "itemId": item_id,
-            "fieldId": self.config.status_field_id,
+            "fieldId": STATUS_FIELD_ID,
             "optionId": option_id
         }
-        print(self.config.project_id)
+        print(PROJECT_ID)
         print(item_id)
-        print(self.config.status_field_id)
+        print(STATUS_FIELD_ID)
         print(option_id)
         
         response = requests.post(
