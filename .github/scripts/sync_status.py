@@ -36,7 +36,7 @@ class Config:
             print("GITHUB_REPOSITORYが見つかりません ...")
             return
         else:
-            print("GITHUB_TOKENからトークンを正常に取得しました。")
+            print("GITHUB_REPOSITORYからトークンを正常に取得しました。")
 
         self.project_token = os.getenv("PROJECT_TOKEN")
         if self.project_token is None:
@@ -187,6 +187,19 @@ class GithubHandler:
           }) {
             projectV2Item {
               id
+              content {
+                ... on Issue {
+                  number
+                  repository {
+                    name
+                  }
+                }
+              }
+              fieldValueByName(name: "Status") {
+                ... on ProjectV2ItemFieldSingleSelectValue {
+                  name
+                }
+              }
             }
           }
         }
@@ -207,7 +220,7 @@ class GithubHandler:
             print(f"GraphQL APIからのエラー: {response.text}")
             return False
 
-        print(response)
+        print(response.json())
         
         print(f"ステータスを '{status}' に正常に更新しました")
         return True
