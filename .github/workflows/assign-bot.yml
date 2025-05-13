@@ -65,4 +65,3 @@ jobs:
     secrets:
       PJ_APP_ID: ${{ secrets.PJ_APP_ID }}
       PJ_APP_PEM: ${{ secrets.PJ_APP_PEM }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
