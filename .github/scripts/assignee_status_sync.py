@@ -19,14 +19,14 @@ def main():
     
     if action == "assigned":
         if current_status in [STATUS_NO_STATUS, STATUS_COLD_LIST, STATUS_NEED_REFINEMENT, STATUS_READY]:
-            print(f"担当者が割り当てられ、ステータスが '{current_status}' のため、'In Progess' に更新します。")
+            print(f"担当者が割り当てられ、ステータスが '{current_status}' のため、'{STATUS_IN_PROGRESS}' に更新します。")
             github_handler.update_issue_status(STATUS_IN_PROGRESS, item_id)
             print(f"Issueのステータスを '{STATUS_IN_PROGRESS}' に更新しました。")
         else:
             print(f"ステータスは '{current_status}' です。更新は不要です。")
     elif action == "unassigned":
         if current_status == STATUS_IN_PROGRESS:
-            print(f"担当者が外れ、ステータスが '{STATUS_IN_PROGRESS}' のため、'Ready' に更新します。")
+            print(f"担当者が外れ、ステータスが '{STATUS_IN_PROGRESS}' のため、'{STATUS_READY}' に更新します。")
             github_handler.update_issue_status(STATUS_READY, item_id)
             print(f"Issueのステータスを '{STATUS_READY}' に更新しました。")
         else:
