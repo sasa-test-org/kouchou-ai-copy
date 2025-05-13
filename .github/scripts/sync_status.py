@@ -28,10 +28,10 @@ class Config:
 
         self.project_token = os.getenv("PROJECT_TOKEN")
         if self.project_token is None:
-            print("GH_TOKENが見つかりません...")
+            print("PROJECT_TOKENが見つかりません...")
             return
         else:
-            print("GH_TOKENを正常に取得しました")
+            print("PROJECT_TOKENを正常に取得しました")
             
         self.issue_number = os.getenv("GITHUB_EVENT_ISSUE_NUMBER")
         if self.issue_number is None:
