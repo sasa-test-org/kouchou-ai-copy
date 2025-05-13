@@ -139,7 +139,8 @@ class GithubHandler:
     def update_issue_status(self, status: str, itemId: str):
         """GraphQL APIを使用してIssueのステータスを更新する"""
         
-        # まずstatusに対応するIDを調べる
+        # まず更新後のstatus（名称）に対応するIDを調べる
+        
         headers = {
             "Authorization": f"Bearer {self.config.project_token}",
             "Content-Type": "application/json"
@@ -182,10 +183,7 @@ class GithubHandler:
             print(f"ステータス '{status}' のオプションが見つかりません")
             return False
 
-        # statusに対応するIDが見つかったので、次にIssueの
-        
-        repo_parts = self.config.github_repo.split('/')
-        repo_owner = repo_parts[0]
+        # 更新後のstatus（名称）に対応するIDが見つかったので、更新する
         
         mutation = """
         mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: ID!) {
