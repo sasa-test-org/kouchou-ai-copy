@@ -176,7 +176,7 @@ class GithubHandler:
         # 更新後のstatus（名称）に対応するIDが見つかったので、更新する
         
         mutation = """
-        mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: ID!) {
+        mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
           updateProjectV2ItemFieldValue(input: {
             projectId: $projectId,
             itemId: $itemId,
