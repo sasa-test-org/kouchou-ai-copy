@@ -121,7 +121,7 @@ class GithubHandler:
             content = item.get("content")
             if content and content.get("__typename") == "Issue":
                 if (content.get("number") == issue_number and 
-                    content.get("repository", {}).get("name") == repo_name:
+                    content.get("repository", {}).get("name") == repo_name):
                     field_value = item.get("fieldValueByName")
                     if field_value:
                         return field_value.get("name"), item["id"]
