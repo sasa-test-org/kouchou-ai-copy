@@ -41,8 +41,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         PROJECT_TOKEN: ${{ steps.generate-token.outputs.token }}
-        PROJECT_ID: ${{ secrets.PROJECT_ID }}
-        STATUS_FIELD: ${{ secrets.STATUS_FIELD }}
+        PROJECT_ID: ${{ vars.PROJECT_ID }}
+        STATUS_FIELD: ${{ vars.STATUS_FIELD }}
         GITHUB_REPOSITORY: ${{ github.repository }}
         GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
         GITHUB_EVENT_ACTION: ${{ github.event.action }}
