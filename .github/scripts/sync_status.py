@@ -129,6 +129,7 @@ class GithubHandler:
             return None
         
         data = response.json()
+        print("data: " + json.dumps(data))
         project_items = data.get("data", {}).get("node", {}).get("items", {}).get("nodes", [])
         
         for item in project_items:
