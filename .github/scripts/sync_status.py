@@ -129,6 +129,8 @@ class GithubHandler:
                 if (content.get("number") == issue_number and content.get("repository", {}).get("name") == repo_name):
                     field_value = item.get("fieldValueByName")
                     if field_value:
+                        print(item["id"])
+                        print(field_value.get("name"))
                         return field_value.get("name"), item["id"]
                     return None, None
         print("Projectにこのissueが見つかりません。アイテム数:", len(project_items))
