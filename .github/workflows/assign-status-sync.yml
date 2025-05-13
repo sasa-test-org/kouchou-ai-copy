@@ -14,8 +14,6 @@ on:
         required: true
       PJ_APP_PEM:
         required: true
-      GITHUB_TOKEN:
-        required: true
 
 jobs:
   update_status:
