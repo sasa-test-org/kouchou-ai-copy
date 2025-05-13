@@ -114,7 +114,6 @@ class GithubHandler:
         
         resjson = response.json()
         project_items = resjson.get("data", {}).get("organization", {}).get("projectV2", {}).get("items", {}).get("nodes", [])
-        print(json.dumps(project_items))
         
         for item in project_items:
             content = item.get("content")
@@ -123,7 +122,7 @@ class GithubHandler:
                     field_value = item.get("fieldValueByName")
                     if field_value:
                         return field_value.get("name"), item["id"]
-                    return None, None
+                    return STATUS_NO_STATUS, item["id"]
         print("Projectにこのissueが見つかりません。アイテム数:", len(project_items))
         return None, None
     
