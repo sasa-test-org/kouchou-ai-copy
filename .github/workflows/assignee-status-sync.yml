@@ -40,6 +40,7 @@ jobs:
     - name: Update Status based on Assignment
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
         PROJECT_TOKEN: ${{ steps.generate-token.outputs.token }}
         GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
         GITHUB_EVENT_ACTION: ${{ github.event.action }}
