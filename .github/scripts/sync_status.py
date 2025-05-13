@@ -41,6 +41,13 @@ class Config:
             self.issue_number = int(self.issue_number)
             print("GITHUB_EVENT_ISSUE_NUMBERを正常に取得しました")
         
+        self.project_id = os.getenv("PROJECT_ID")
+        if self.project_id is None:
+            print("PROJECT_IDDが見つかりません...")
+            return
+        else:
+            print("PROJECT_IDを正常に取得しました。")
+        
         self.status_field_id = os.getenv("STATUS_FIELD")
         if self.status_field_id is None:
             print("STATUS_FIELDが見つかりません...")
