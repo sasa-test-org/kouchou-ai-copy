@@ -110,10 +110,11 @@ class GithubHandler:
         )
         if response.status_code != 200:
             print(f"GraphQL APIからのエラー: {response.text}")
-            return None
+            return None, None
         
         resjson = response.json()
         project_items = resjson.get("data", {}).get("organization", {}).get("projectV2", {}).get("items", {}).get("nodes", [])
+        print(json.dumps(project_items))
         
         for item in project_items:
             content = item.get("content")
