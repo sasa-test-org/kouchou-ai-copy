@@ -219,8 +219,11 @@ class GithubHandler:
         if response.status_code != 200:
             print(f"GraphQL APIからのエラー: {response.text}")
             return False
-
-        print(response.json())
+        
+        resjson = response.json()
+        if resjson.get("errors"):
+            print(f"GraphQL APIからのエラー: {resjson['errors']}")
+            return False
         
         print(f"ステータスを '{status}' に正常に更新しました")
         return True
