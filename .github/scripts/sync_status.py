@@ -121,8 +121,6 @@ class GithubHandler:
                 if (content.get("number") == self.issue_number and content.get("repository", {}).get("name") == REPO_NAME):
                     field_value = item.get("fieldValueByName")
                     if field_value:
-                        print(item["id"])
-                        print(field_value.get("name"))
                         return field_value.get("name"), item["id"]
                     return None, None
         print("Projectにこのissueが見つかりません。アイテム数:", len(project_items))
@@ -199,8 +197,6 @@ class GithubHandler:
             "fieldId": STATUS_FIELD_ID,
             "optionId": option_id
         }
-        print("itemId" + item_id)
-        print("optionId" + option_id)
         
         response = requests.post(
             "https://api.github.com/graphql",
@@ -210,6 +206,8 @@ class GithubHandler:
         if response.status_code != 200:
             print(f"GraphQL APIからのエラー: {response.text}")
             return False
+
+        print(json.dumps(response))
         
         print(f"ステータスを '{status}' に正常に更新しました")
         return True
