@@ -220,7 +220,7 @@ class GithubHandler:
             print(f"GraphQL APIからのエラー: {response.text}")
             return False
 
-        # print(response.json())
+        print(response.json())
         
         print(f"ステータスを '{status}' に正常に更新しました")
         return True
