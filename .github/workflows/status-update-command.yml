@@ -44,8 +44,8 @@ jobs:
     if: needs.read-comment.outputs.should_update == 'true'
     uses: ./.github/workflows/status-update-call.yml
     with:
-      issue_number: ${{ needs.manage-assignment.outputs.issue_number }}
-      action: ${{ needs.manage-assignment.outputs.action }}
+      issue_number: ${{ needs.read-comment.outputs.issue_number }}
+      action: ${{ needs.read-comment.outputs.action }}
     secrets:
       PJ_APP_ID: ${{ secrets.PJ_APP_ID }}
       PJ_APP_PEM: ${{ secrets.PJ_APP_PEM }}
