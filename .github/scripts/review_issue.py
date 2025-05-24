@@ -7,10 +7,7 @@ if not os.getenv('GITHUB_ACTIONS'):
     from dotenv import load_dotenv
     load_dotenv()
 
-EMBEDDING_MODEL = "text-embedding-3-small"
-COLLECTION_NAME = "issue_collection"
 GPT_MODEL = "gpt-4.1-nano"
-MAX_RESULTS = 3
 
 class Config:
     def __init__(self):
@@ -19,17 +16,27 @@ class Config:
         if self.github_token is None:
             print("GITHUB_TOKENが見つかりません ...")
         else:
-            print("GITHUB_TOKENからトークンを正常に取得しました。")
+            print("GITHUB_TOKENを正常に取得しました。")
         
         self.github_repo = os.getenv("GITHUB_REPOSITORY")
-        print("GITHUB_REPOSITORYの状態:", "取得済み" if self.github_repo else "見つかりません")
+        if self.github_repo is None:
+            print("GITHUB_REPOSITORYが見つかりません ...")
+        else:
+            print("GITHUB_REPOSITORYを正常に取得しました。")
         
         self.issue_number = os.getenv("GITHUB_EVENT_ISSUE_NUMBER")
-        if self.issue_number:
-            self.issue_number = int(self.issue_number)
-            print(f"GITHUB_EVENT_ISSUE_NUMBER: {self.issue_number}")
+        if self.issue_number is None:
+            print("GITHUB_EVENT_ISSUE_NUMBERが見つかりません ...")
         else:
-            print("GITHUB_EVENT_ISSUE_NUMBERが見つかりません")
+            self.issue_number = int(self.issue_number)
+            print("GITHUB_EVENT_ISSUE_NUMBERを正常に取得しました。")
+
+        self.openai_api_key = os.getenv("OPENAI_API_KEY")
+        if self.openai_api_key is None:
+            print("OPENAI_API_KEYが見つかりません ...")
+        else:
+            print("OPENAI_API_KEYを正常に取得しました。")
+
         print("設定の初期化が完了しました。")
 
 class GithubHandler:
@@ -51,6 +58,20 @@ class IssueProcessor:
             'docker', 'documentation', 'e2e-test-required', 'enhancement', 
             'github_actions', 'good first issue', 'invalid', 'javascript', 'python'
         ]
+        self.labels_for_content = {
+            "documentation": "開発資料の提案",
+            "design": "UIデザインの提案",
+            "bug": "製品機能に不具合がある",
+            "enhancement": "製品機能改善の提案",
+            "good first issue": "軽微な修正",
+            "Algorithm": "製品機能を変えないアルゴリズムの改善（速度改善など）",
+            "e2e-test-required": "E2E testを実行します",
+            "github_actions": "Github Actions関連の提案",
+            "docker": "docker関連の提案",
+            "Client": "レポート画面またはレポート一覧画面の提案",
+            "Admin": "管理画面の提案",
+            "API": "API処理の提案"
+        }
 
     def process_issue(self, issue_content: str, issue_title: str = ""):
         """Issueを処理する"""
@@ -105,20 +126,20 @@ class IssueProcessor:
                 
     def _analyze_and_add_content_labels(self, issue_content: str):
         """OpenAIを使ってIssueの内容からラベルを判定する"""
-        prompt = f"""
-        以下はGitHubのIssueの内容です。この内容を分析して、最も適切なラベルを選んでください。
-        
-        Issue内容:
-        {issue_content}
-        
-        選択可能なラベル:
-        {', '.join(self.available_labels)}
-        
-        このIssueに付与すべきラベルを3つまで選んでJSON形式で返してください。
-        例: {{"labels": ["bug", "javascript", "enhancement"]}}
-        
-        Issueの内容に合わないラベルは選ばないでください。適切なラベルが1つか2つしかない場合は、無理に3つ選ぶ必要はありません。
-        """
+        import json
+        prompt = f"""以下はGitHubのIssueの内容です。この内容を分析して、解決すべき課題の分類として適切なラベルがもしあれば選んでください。明らかにそのラベルが適切であると判断できる場合以外はラベルを付与しないでください。画像は無視してください。
+
+Issue内容:
+{issue_content}
+
+選択可能なラベルとその説明文:
+{json.dumps(self.labels_for_content)}
+
+このIssueに付与すべきラベルを3つまで選んでJSON形式で返してください。
+例: {{"labels": ["documentation", "good first issue", "design"]}}
+
+Issueの内容に合わないラベルは選ばないでください。適切なラベルが1つか2つしかない場合は、無理に3つ選ぶ必要はありません。
+"""
         
         try:
             response = self.openai_client.chat.completions.create(
@@ -149,21 +170,12 @@ def setup():
     """セットアップを行い、必要なオブジェクトを返す"""
     config = Config()
     github_handler = GithubHandler(config)
-
-    try:
-        openai_api_key = os.getenv("OPENAI_API_KEY")
-        if openai_api_key is None:
-            print("OPENAI_API_KEYが見つかりません ...")
-            return github_handler, None
-    except Exception as e:
-        print(f"OpenAI APIキーの取得中にエラーが発生しました: {e}")
-    openai_client = openai.Client(api_key=openai_api_key)
-
+    openai_client = openai.Client(api_key=config.openai_api_key) if config.openai_api_key else None
     return github_handler, openai_client
 
 def main():
     github_handler, openai_client = setup()
-    if github_handler is None or openai_client is None:
+    if not all([github_handler, openai_client]):
         print("セットアップに失敗しました。")
         return
 

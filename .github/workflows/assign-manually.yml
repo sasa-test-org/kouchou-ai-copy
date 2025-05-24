@@ -5,11 +5,12 @@ on:
     types: [assigned, unassigned]
 
 permissions:
-  issues: read
+  issues: write
+  contents: read
 
 jobs:
-  assign-status-sync:
-    uses: ./.github/workflows/assign-status-sync.yml
+  status-update-call:
+    uses: ./.github/workflows/status-update-call.yml
     with:
       issue_number: ${{ github.event.issue.number }}
       action: ${{ github.event.action }}
