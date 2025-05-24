@@ -1,9 +1,9 @@
 REPO_CONFIG = {
-  "repo_owner": "digitaldemocracy2030",
-  "repo_name": "kouchou-ai",
-  "project_id": "PVT_kwDODCKp5M4A00DQ",
-  "project_no": 3,
-  "status_field_id": "PVTSSF_lADODCKp5M4A00DQzgqYqoE",
+  "repo_owner": "sasa-test-org",
+  "repo_name": "kouchou-ai-copy",
+  "project_id": "PVT_kwDODIeyUM4A4Mna",
+  "project_no": 1,
+  "status_field_id": "PVTSSF_lADODIeyUM4A4MnazgtNHg0",
   "status": {
     "no_status": None,
     "cold_list": "Cold List",
